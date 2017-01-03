@@ -170,11 +170,11 @@ export default class {
           const context = this
           return Promise.resolve()
             .then(() => context._responseHandler.removeResponse(token, phraseId, response.id))
-            .then(serverResponse => {
-              if (serverResponse.removed) {
-                return serverResponse
+            .then(json => {
+              if (json.removed) {
+                return json.removed
               }
-              throw serverResponse
+              throw new Error(`Unable to remove a response for ${phraseId}`)
             })
             .catch(error => {
               throw error
