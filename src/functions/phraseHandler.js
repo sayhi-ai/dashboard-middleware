@@ -1,22 +1,20 @@
 import ENV_VARS from "../util/ENV_VARS"
 import logger from "../util/logger"
-import ErrorHandler from "../util/errorHandler"
 import Promise from "bluebird"
 
 export default class {
   constructor(functionHandler, clientsHandler) {
     this._responseHandler = functionHandler.getResponseHandler()
     this._gcClient = clientsHandler.getGCClient()
-    this._errorHandler = new ErrorHandler("phraseHandler.js")
   }
 
   getPhrases(token, botId) {
-    logger.debug("Getting all phrases for bot: " + botId)
+    logger.debug(`Getting all phrases for bot: ${botId}.`)
 
     const query = {
       query: `
         query {
-          Bot(id: "` + botId + `") {
+          Bot(id: "${botId}") {
             phrases {
               id,
               phrase
@@ -28,22 +26,22 @@ export default class {
 
     return this._gcClient.query(query)
       .then(response => {
-        logger.debug("Got all phrases for bot: " + botId)
-        return JSON.stringify({phrases: response.Bot.phrases})
+        logger.debug(`Got all phrases for bot: ${botId}.`)
+        return {phrases: response.Bot.phrases}
       })
       .catch(error => {
-        throw this._errorHandler.create("getPhrases", 400, error, "Unable to get all phrases for bot: " + botId + ".")
+        throw new Error(`Unable to get all phrases for bot: ${botId} -- Error: ${error}`)
       })
   }
 
   addPhrase(token, botId, phrase) {
-    logger.debug("Adding a phrase to bot: " + botId)
+    logger.debug(`Adding phrase to bot: ${botId}.`)
 
     const query = {
       query: `
         query {
-          Bot(id: "` + botId + `") {
-            phrases(filter: {phrase: "` + phrase + `"}) {
+          Bot(id: "${botId}") {
+            phrases(filter: {phrase: "${phrase}"}) {
               id
             }
           }
@@ -53,30 +51,28 @@ export default class {
 
     return Promise.resolve()
       .then(() => {
-        if (phrase === "" || phrase.length > ENV_VARS.CONSTANTS.MAX_PHRASE_TOKEN_LENGTH) {
-          throw this._errorHandler.create("addPhrase", 400, "", "Length of phrase must be between 0 and " +
-            ENV_VARS.CONSTANTS.MAX_PHRASE_TOKEN_LENGTH + ".")
+        if (phrase === `` || phrase.length > ENV_VARS.CONSTANTS.MAX_PHRASE_TOKEN_LENGTH) {
+          throw new Error(`Length of phrase must be between 0 and ${ENV_VARS.CONSTANTS.MAX_PHRASE_TOKEN_LENGTH}.`)
         }
 
-        return "no-op"
+        return `no-op`
       })
       .then(noOp => {
         if (phrase.includes(ENV_VARS.CONSTANTS.RESPONSE_VARIABLE)) {
-          throw this._errorHandler.create("addPhrase", 400, "", ENV_VARS.CONSTANTS.RESPONSE_VARIABLE +
-            " not allowed in phrase.")
+          throw new Error(`${ENV_VARS.CONSTANTS.RESPONSE_VARIABLE} not allowed in phrase`)
         }
 
-        return "no-op"
+        return `no-op`
       })
       .then(noOP => this._gcClient.query(query))
       .then(response => {
         const phrases = response.Bot.phrases
         if (phrases.length === 0) {
-          logger.debug("Phrase does not exists for bot: " + botId + ", creating a new one.")
+          logger.debug(`Phrase does not exists for bot: ${botId}, creating a new one.`)
           return response
         }
 
-        throw this._errorHandler.create("addPhrase", 400, "", "Duplicate phrase found.")
+        throw new Error(`Duplicate phrase found.`)
       })
       .then(response => this._createNewPhrase(token, botId, phrase))
       .catch(error => {
@@ -88,7 +84,7 @@ export default class {
     const query = {
       query: `
         mutation {
-          createPhrase(phrase: "` + phrase + `") {
+          createPhrase(phrase: "${phrase}") {
             id
           }
         }`,
@@ -97,12 +93,12 @@ export default class {
 
     return this._gcClient.query(query)
       .then(response => {
-        logger.debug("Created phrase for bot: " + botId + ", linking phrase with the bot now..")
+        logger.debug(`Created phrase for bot: ${botId}, linking phrase with the bot now..`)
         return response
       })
       .then(response => this._linkPhraseToBot(token, botId, response.createPhrase.id))
       .catch(error => {
-        throw this._errorHandler.create("_createNewPhrase", 400, error, "Unable to create new phrase.")
+        throw new Error(`Unable to create new phrase. -- Error: ${error}`)
       })
   }
 
@@ -111,8 +107,8 @@ export default class {
       query: `
         mutation {
           addToBotPhraseRelation(
-            botsBotId: "` + botId + `",
-            phrasesPhraseId: "` + phraseId + `"
+            botsBotId: "${botId}",
+            phrasesPhraseId: "${phraseId}"
           ) {
             botsBot {
               id
@@ -128,22 +124,21 @@ export default class {
     return this._gcClient.query(query)
       .then(response => {
         if (response.addToBotPhraseRelation === null) {
-          logger.warn("Did not link phrase because a connection already exists between bot and phrase.")
-          return JSON.stringify({added: false})
+          logger.warn(`Did not link phrase because a connection already exists between bot and phrase.`)
+          return {added: false}
         }
 
         const phraseId = response.addToBotPhraseRelation.phrasesPhrase.id
-        logger.debug("Linked phrase: " + phraseId + " with bot: " + botId + "successfully.")
-        return JSON.stringify({added: true, id: phraseId})
+        logger.debug(`Linked phrase: ${phraseId} with bot: ${botId} successfully.`)
+        return {added: true, id: phraseId}
       })
       .catch(error => {
-        throw this._errorHandler.create("_createNewPhrase", 400, error, "Unable to link phrase: " + phraseId +
-          " to bot: " + botId + ".")
+        throw new Error(`Unable to link phrase: ${phraseId} to bot: ${botId} -- Error: ${error}`)
       })
   }
 
   removePhrase(token, phraseId) {
-    logger.debug("Preparing to remove phrase: " + phraseId + "..")
+    logger.debug(`Preparing to remove phrase: ${phraseId}..`)
 
     return this._removeResponsesFromPhrase(token, phraseId)
       .then(response => this._removePhrase(token, phraseId))
@@ -153,12 +148,12 @@ export default class {
   }
 
   _removeResponsesFromPhrase(token, phraseId) {
-    logger.debug("Removing responses from phrase: " + phraseId + "..")
+    logger.debug(`Removing responses from phrase: ${phraseId}..`)
 
     const query = {
       query: `
         query {
-          Phrase(id: "` + phraseId + `") {
+          Phrase(id: "${phraseId}") {
             responses {
               id
             }
@@ -189,8 +184,7 @@ export default class {
         return Promise.all(responses)
       })
       .catch(error => {
-        throw this._errorHandler.create("removeResponsesFromPhrase", 500, error, "Unable to remove one more responses" +
-          "from phrase: " + phraseId + ".")
+        throw new Error(`Unable to remove one more response from phrase: ${phraseId} -- Error: ${error}`)
       })
   }
 
@@ -198,7 +192,7 @@ export default class {
     const query = {
       query: `
           mutation {
-            deletePhrase(id: "` + phraseId + `") {
+            deletePhrase(id: "${phraseId}") {
               id
             }
           }`,
@@ -208,15 +202,15 @@ export default class {
     return this._gcClient.query(query)
       .then(response => {
         if (response.deletePhrase === null) {
-          logger.warn("Did not remove phrase.")
-          return JSON.stringify({removed: false})
+          logger.warn(`Did not remove phrase.`)
+          return {removed: false}
         }
 
-        logger.debug("Removed phrase.")
-        return JSON.stringify({removed: true})
+        logger.debug(`Removed phrase.`)
+        return {removed: true}
       })
       .catch(error => {
-        throw this._errorHandler.create("_removePhrase", 500, error, "Unable to remove phrase: " + phraseId + ".")
+        throw new Error(`Unable to remove phrase: ${phraseId} -- Error: ${error}`)
       })
   }
 }

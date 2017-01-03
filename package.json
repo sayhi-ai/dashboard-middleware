@@ -1,11 +1,11 @@
 {
-  "name": "server",
+  "name": "dashboard-middleware",
   "version": "1.0.0",
-  "description": "Server for sayhi.ai.",
-  "main": "start.js",
+  "description": "Middleware for sayhi.ai dashboard.",
+  "main": "lib/lib.min.js",
   "repository": {
     "type": "git",
-    "url": "git+https://bitbucket.org/sayhi-ai/server"
+    "url": "git+https://bitbucket.org/sayhi-ai/dashboard-middleware"
   },
   "keywords": [
     "conversational",
@@ -56,12 +56,12 @@
   "author": "sayhi-ai",
   "license": "GPL",
   "bugs": {
-    "url": "https://bitbucket.org/sayhi-ai/server/issues"
+    "url": "https://bitbucket.org/sayhi-ai/dashboard-middleware/issues"
   },
   "homepage": "https://sayhi.ai",
   "engines": {
     "npm": ">=3.0.0",
-    "node": ">=5.0.0"
+    "node": ">=7.0.0"
   },
   "dependencies": {
     "bluebird": "^3.4.7",
@@ -83,21 +83,20 @@
     "copy-webpack-plugin": "^4.0.1",
     "eslint": "^3.5.0",
     "eslint-config-google": "^0.6.0",
+    "json-loader": "^0.5.4",
     "nodemon": "^1.10.2",
     "npm-run-all": "^3.1.0",
     "webpack": "^1.13.2"
   },
   "scripts": {
-    "clean": "rm build",
+    "start": "npm-run-all lint build",
+    "dev": "webpack --progress --config tools/webpack.config.dev.js --watch",
     "lint": "eslint ./src",
-    "test": "",
-    "prebuild": "npm-run-all lint test",
-    "build": "webpack --progress --config tools/webpack.config.prod.js",
-    "build:dev": "webpack --progress --config tools/webpack.config.dev.js",
-    "build:dev:watch": "webpack --progress --config tools/webpack.config.dev.js --watch",
-    "server:dev": "nodemon dev/start.js",
-    "server:prod": "node build/start.js",
-    "start": "npm-run-all lint build server:prod",
-    "dev": "npm-run-all --parallel build:dev:watch server:dev"
+    "build": "webpack -p --config tools/webpack.config.prod.js",
+    "build:dev": "webpack -p --config tools/webpack.config.dev.js",
+    "generate-docs": "esdoc -c esdoc.json",
+    "deploy-docs": "gh-pages-deploy",
+    "clean-source": "rimraf README.md src webroot package.json",
+    "prepublish": "npm-run-all build"
   }
 }
