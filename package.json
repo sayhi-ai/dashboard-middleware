@@ -85,11 +85,10 @@
     "eslint-config-google": "^0.6.0",
     "json-loader": "^0.5.4",
     "nodemon": "^1.10.2",
-    "npm-run-all": "^3.1.0",
     "webpack": "^1.13.2"
   },
   "scripts": {
-    "start": "npm-run-all lint build",
+    "start": "npm run lint && npm run build",
     "dev": "webpack --progress --config tools/webpack.config.dev.js --watch",
     "lint": "eslint ./src",
     "build": "webpack -p --config tools/webpack.config.prod.js",
@@ -97,6 +96,6 @@
     "generate-docs": "esdoc -c esdoc.json",
     "deploy-docs": "gh-pages-deploy",
     "clean-source": "rimraf README.md src webroot package.json",
-    "prepublish": "npm-run-all build"
+    "prepublish": "npm run start"
   }
 }
