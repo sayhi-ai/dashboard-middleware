@@ -1,0 +1,16 @@
+NPM Module:
+    Methods:
+     - init({
+        token
+     }):Promise
+
+     - say(phrase):Promise
+
+     - say(phrase, config: {
+        variables: {
+            name: string
+            age: number
+        },
+        lang: ''
+     }):Promise
+

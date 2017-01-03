@@ -1,0 +1,11 @@
+# Project files and folders
+dev
+build
+log
+node_modules
+
+# IDE files and folders
+.idea
+
+# Other
+*.log*

@@ -1,0 +1,103 @@
+{
+  "name": "server",
+  "version": "1.0.0",
+  "description": "Server for sayhi.ai.",
+  "main": "start.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://bitbucket.org/sayhi-ai/server"
+  },
+  "keywords": [
+    "conversational",
+    "bots",
+    "natural",
+    "language",
+    "human",
+    "conversation",
+    "say",
+    "hi",
+    "ai",
+    "artificial",
+    "intelligence",
+    "answers",
+    "responses",
+    "api",
+    "make",
+    "your",
+    "bot",
+    "build",
+    "tool",
+    "persona",
+    "for"
+  ],
+  "tags": [
+    "conversational",
+    "bots",
+    "natural",
+    "language",
+    "human",
+    "conversation",
+    "say",
+    "hi",
+    "ai",
+    "artificial",
+    "intelligence",
+    "answers",
+    "responses",
+    "api",
+    "make",
+    "your",
+    "bot",
+    "build",
+    "tool",
+    "persona",
+    "for"
+  ],
+  "author": "sayhi-ai",
+  "license": "GPL",
+  "bugs": {
+    "url": "https://bitbucket.org/sayhi-ai/server/issues"
+  },
+  "homepage": "https://sayhi.ai",
+  "engines": {
+    "npm": ">=3.0.0",
+    "node": ">=5.0.0"
+  },
+  "dependencies": {
+    "bluebird": "^3.4.7",
+    "body-parser": "^1.15.2",
+    "immutable": "^3.8.1",
+    "jwt-decode": "^2.1.0",
+    "lokka": "^1.7.0",
+    "lokka-transport-http": "^1.6.1",
+    "morgan": "^1.7.0",
+    "winston": "^2.3.0"
+  },
+  "devDependencies": {
+    "babel-core": "^6.9.1",
+    "babel-loader": "^6.2.4",
+    "babel-plugin-add-module-exports": "^0.1.2",
+    "babel-polyfill": "^6.9.1",
+    "babel-preset-es2015": "^6.9.0",
+    "babel-runtime": "^6.5.0",
+    "copy-webpack-plugin": "^4.0.1",
+    "eslint": "^3.5.0",
+    "eslint-config-google": "^0.6.0",
+    "nodemon": "^1.10.2",
+    "npm-run-all": "^3.1.0",
+    "webpack": "^1.13.2"
+  },
+  "scripts": {
+    "clean": "rm build",
+    "lint": "eslint ./src",
+    "test": "",
+    "prebuild": "npm-run-all lint test",
+    "build": "webpack --progress --config tools/webpack.config.prod.js",
+    "build:dev": "webpack --progress --config tools/webpack.config.dev.js",
+    "build:dev:watch": "webpack --progress --config tools/webpack.config.dev.js --watch",
+    "server:dev": "nodemon dev/start.js",
+    "server:prod": "node build/start.js",
+    "start": "npm-run-all lint build server:prod",
+    "dev": "npm-run-all --parallel build:dev:watch server:dev"
+  }
+}
