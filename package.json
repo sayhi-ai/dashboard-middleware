@@ -65,12 +65,10 @@
   },
   "dependencies": {
     "bluebird": "^3.4.7",
-    "body-parser": "^1.15.2",
     "immutable": "^3.8.1",
     "jwt-decode": "^2.1.0",
     "lokka": "^1.7.0",
     "lokka-transport-http": "^1.6.1",
-    "morgan": "^1.7.0",
     "winston": "^2.3.0"
   },
   "devDependencies": {
@@ -96,6 +94,7 @@
     "generate-docs": "esdoc -c esdoc.json",
     "deploy-docs": "gh-pages-deploy",
     "clean-source": "rimraf README.md src webroot package.json",
-    "prepublish": "npm run start"
+    "prepublish": ". ./gemfury-prepublish.sh",
+    "postpublish": ". ./gemfury-postpublish.sh"
   }
 }
