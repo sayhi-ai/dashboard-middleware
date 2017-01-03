@@ -1,10 +1,3 @@
-#Server
+# Middleware for dashboard
 
-sample json to graphcool:
-
-
-```json
-{
-  data: "{allUsers{id email}}"
-}
-```
+manages bots, phrases and responses
