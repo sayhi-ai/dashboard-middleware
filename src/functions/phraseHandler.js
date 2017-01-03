@@ -171,7 +171,7 @@ export default class {
           return Promise.resolve()
             .then(() => context._responseHandler.removeResponse(token, phraseId, response.id))
             .then(serverResponse => {
-              if (JSON.parse(serverResponse).removed) {
+              if (serverResponse.removed) {
                 return serverResponse
               }
               throw serverResponse
