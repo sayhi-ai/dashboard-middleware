@@ -1,7 +1,7 @@
 import ENV_VARS from "../util/ENV_VARS"
 import logger from "../util/logger"
-import Lokka from 'lokka'
-import HttpTransport from 'lokka-transport-http'
+import Lokka from "lokka"
+import HttpTransport from "lokka-transport-http"
 
 export default class {
   login(query) {
