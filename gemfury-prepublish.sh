@@ -9,5 +9,5 @@ npm config set registry https://npm-proxy.fury.io/sayhi-ai/
 echo "Done."
 
 echo "Logging in.."
-#npm adduser
+npm adduser
 echo "Done."
