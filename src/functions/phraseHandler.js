@@ -13,7 +13,7 @@ export default class {
 
     const query = {
       query: `
-        query getPhrases($id: id) {
+        query getPhrases($id: ID!) {
           Bot(id: $id) {
             phrases {
               id,
