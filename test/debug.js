@@ -78,6 +78,6 @@ const phraseId = "cixi6jot5qkla0141zcxwxut3"
 const text = `df`
 const html = "<p>" + text + "</p>"
 const vars = []
-//addResponse(phraseId, text, html, vars)
-fetchPhrases("cixf3et6c5io4010759dn050r")
-
+// addResponse(phraseId, text, html, vars)
+// fetchPhrases("cixf3et6c5io4010759dn050r")
+removeResponse("cixi6jot5qkla0141zcxwxut3", "cixj2min3jy8c0161kjtutp5s")

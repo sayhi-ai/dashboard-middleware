@@ -164,7 +164,7 @@ export default class {
 
     const query = {
       query: `
-        query findResponseToRemove($id: ID!) {
+        query findResponseToRemove($id: ID!){
           Response(id: $id) {
             phrases {
               id
@@ -172,7 +172,7 @@ export default class {
           }
         }`,
       vars: {
-        id: phraseId
+        id: responseId
       },
       token: token
     }
