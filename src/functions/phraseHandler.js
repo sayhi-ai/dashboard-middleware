@@ -115,10 +115,10 @@ export default class {
   _linkPhraseToBot(token, botId, phraseId) {
     const query = {
       query: `
-        mutation linkPhraseToBot($botId: ID!, $phraseID!: ID!) {
+        mutation linkPhraseToBot($botId: ID!, $phraseId: ID!) {
           addToBotPhraseRelation(
             botsBotId: $botId,
-            phrasesPhraseId: $phraseId}
+            phrasesPhraseId: $phraseId
           ) {
             botsBot {
               id

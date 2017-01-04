@@ -80,4 +80,6 @@ const html = "<p>" + text + "</p>"
 const vars = []
 // addResponse(phraseId, text, html, vars)
 // fetchPhrases("cixf3et6c5io4010759dn050r")
-removeResponse("cixi6jot5qkla0141zcxwxut3", "cixj2min3jy8c0161kjtutp5s")
+// removeResponse("cixi6jot5qkla0141zcxwxut3", "cixj2min3jy8c0161kjtutp5s")
+// addPhrase("cixf3et6c5io4010759dn050r", "test")
+removePhrase("cixj49vng7hr40108i6k1lxqy")
