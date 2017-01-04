@@ -1,5 +1,6 @@
 import ENV_VARS from "../util/ENV_VARS"
 import logger from "../util/logger"
+import PreProcessor from '../util/preProcessor'
 import Promise from "bluebird"
 
 export default class {
@@ -9,6 +10,13 @@ export default class {
 
   getResponses(token, phraseId, type) {
     logger.debug(`Getting responses for phrase: ${phraseId}..`)
+
+    const isWord = PreProcessor.checkForWord(phraseId)
+    if (!isWord) {
+      throw new Error("Error getting responses: phrase id is invalid.")
+    }
+    type = PreProcessor.safeEscape(type)
+
     return this._getResponses(token, phraseId, type, null)
       .then(response => {
         return {responses: response}
@@ -44,6 +52,13 @@ export default class {
 
   addResponse(token, phraseId, text, html, vars) {
     logger.debug(`Adding a response to phrase: ${phraseId}..`)
+
+    const isWord = PreProcessor.checkForWord(phraseId)
+    if (!isWord) {
+      throw new Error("Error adding response: phrase id is invalid.")
+    }
+    text = PreProcessor.safeEscape(text)
+    html = PreProcessor.safeEscape(html)
 
     const query = {
       query: `
@@ -146,6 +161,15 @@ export default class {
 
   removeResponse(token, phraseId, responseId) {
     logger.debug(`Removing response: ${responseId}..`)
+
+    const phraseIsWord = PreProcessor.checkForWord(phraseId)
+    if (!phraseIsWord) {
+      throw new Error("Error removing response: phrase id is invalid.")
+    }
+    const responseIsWord = PreProcessor.checkForWord(responseId)
+    if (!responseIsWord) {
+      throw new Error("Error removing response: response id is invalid.")
+    }
 
     const query = {
       query: `

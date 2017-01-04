@@ -1,5 +1,6 @@
 import ENV_VARS from "../util/ENV_VARS"
 import logger from "../util/logger"
+import PreProcessor from '../util/preProcessor'
 import Promise from "bluebird"
 
 export default class {
@@ -10,6 +11,11 @@ export default class {
 
   getPhrases(token, botId) {
     logger.debug(`Getting all phrases for bot: ${botId}.`)
+
+    const isWord = PreProcessor.checkForWord(botId)
+    if (!isWord) {
+      throw new Error("Error getting phrases: bot id is invalid.")
+    }
 
     const query = {
       query: `
@@ -36,6 +42,12 @@ export default class {
 
   addPhrase(token, botId, phrase) {
     logger.debug(`Adding phrase to bot: ${botId}.`)
+
+    const isWord = PreProcessor.checkForWord(botId)
+    if (!isWord) {
+      throw new Error("Error adding phrase: bot id is invalid.")
+    }
+    phrase = PreProcessor.safeEscape(phrase)
 
     const query = {
       query: `
@@ -139,6 +151,11 @@ export default class {
 
   removePhrase(token, phraseId) {
     logger.debug(`Preparing to remove phrase: ${phraseId}..`)
+
+    const isWord = PreProcessor.checkForWord(phraseId)
+    if (!isWord) {
+      throw new Error("Error removing phrase: phrase id is invalid.")
+    }
 
     return this._removeResponsesFromPhrase(token, phraseId)
       .then(response => this._removePhrase(token, phraseId))

@@ -1,6 +1,7 @@
 import jwtDecode from "jwt-decode"
 import ENV_VARS from "../util/ENV_VARS"
 import logger from "../util/logger"
+import PreProcessor from '../util/preProcessor'
 import Promise from "bluebird"
 
 export default class {
@@ -41,6 +42,9 @@ export default class {
 
   addBot(token, name, type, description) {
     logger.debug(`Adding a bot with name: ${name}, type: ${type}, description: ${description}..`)
+    name = PreProcessor.safeEscape(name)
+    type = PreProcessor.safeEscape(type)
+    description = PreProcessor.safeEscape(description)
 
     const decodedToken = jwtDecode(token)
 
@@ -145,6 +149,12 @@ export default class {
 
   removeBot(token, botId) {
     logger.debug(`Preparing to remove bot: ${botId}..`)
+
+    const isWord = PreProcessor.checkForWord(botId)
+    if (!isWord) {
+      throw new Error("Error removing bot: bot id is invalid.")
+    }
+
     return this._removePhrasesFromBot(token, botId)
       .then(response => this._removeBot(token, botId))
       .catch(error => {
