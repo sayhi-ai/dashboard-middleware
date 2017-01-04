@@ -1,7 +1,6 @@
 import jwtDecode from "jwt-decode"
 import ENV_VARS from "../util/ENV_VARS"
 import logger from "../util/logger"
-import PreProcessor from '../util/preProcessor'
 import Promise from "bluebird"
 
 export default class {
@@ -16,8 +15,8 @@ export default class {
 
     const query = {
       query: `
-        query {
-          User(id: "${decodedToken.userId}") {
+        query getBots($id: ID!) {
+          User(id: $id) {
             bots {
               id,
               name,
@@ -26,6 +25,9 @@ export default class {
             }
           }
         }`,
+      vars: {
+        id: decodedToken.userId
+      },
       token: token
     }
 
@@ -42,21 +44,21 @@ export default class {
 
   addBot(token, name, type, description) {
     logger.debug(`Adding a bot with name: ${name}, type: ${type}, description: ${description}..`)
-    name = PreProcessor.safeEscape(name)
-    type = PreProcessor.safeEscape(type)
-    description = PreProcessor.safeEscape(description)
 
     const decodedToken = jwtDecode(token)
-
     const query = {
       query: `
-        query {
-          User(id: "${decodedToken.userId}") {
-            bots(filter: {name: "${name}"}) {
+        query checkDuplicateBot($id: ID!, $name: String!) {
+          User(id: $id) {
+            bots(filter: {name: $name}) {
               id
             }
           }
         }`,
+      vars: {
+        id: decodedToken.userId,
+        name: name
+      },
       token: token
     }
 
@@ -95,11 +97,16 @@ export default class {
   _createNewBot(token, name, type, description) {
     const query = {
       query: `
-        mutation {
-          createBot(name: "${name}", type: "${type}", description: "${description}") {
+        mutation createBot($name: String!, $type: String!, $description: String) {
+          createBot(name: $name, type: $type, description: $description) {
             id
           }
         }`,
+      vars: {
+        name: name,
+        type: type,
+        description: description
+      },
       token: token
     }
 
@@ -118,8 +125,8 @@ export default class {
 
     const query = {
       query: `
-        mutation {
-          addToUserBotRelation(usersUserId: "${decodedToken.userId}", botsBotId: "${botId}") {
+        mutation linkBotWithUser($userId: ID!, $botId: ID!) {
+          addToUserBotRelation(usersUserId: $userId, botsBotId: $botId) {
             usersUser {
               id
             }
@@ -128,6 +135,10 @@ export default class {
             }
           }
         }`,
+      vars: {
+        userId: decodedToken.userId,
+        botId: botId
+      },
       token: token
     }
 
@@ -150,11 +161,6 @@ export default class {
   removeBot(token, botId) {
     logger.debug(`Preparing to remove bot: ${botId}..`)
 
-    const isWord = PreProcessor.checkForWord(botId)
-    if (!isWord) {
-      throw new Error("Error removing bot: bot id is invalid.")
-    }
-
     return this._removePhrasesFromBot(token, botId)
       .then(response => this._removeBot(token, botId))
       .catch(error => {
@@ -166,13 +172,16 @@ export default class {
     logger.debug(`Removing phrases from bot: ${botId}..`)
     const query = {
       query: `
-        query {
-          Bot(id: "${botId}") {
+        query findBotToRemove($id: ID!) {
+          Bot(id: $id) {
             phrases {
               id
             }
           }
         }`,
+      vars: {
+        id: botId
+      },
       token: token
     }
 
@@ -218,11 +227,14 @@ export default class {
   _removeBot(token, botId) {
     const query = {
       query: `
-          mutation {
-            deleteBot(id: "${botId}") {
+          mutation deleteBot($id: ID!) {
+            deleteBot(id: $id) {
               id
             }
           }`,
+      vars: {
+        id: botId
+      },
       token: token
     }
 

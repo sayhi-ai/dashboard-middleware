@@ -1,5 +1,4 @@
 const middleware = require("../dev/lib.min")
-
 const token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE0ODYwNjI4NzYsImlhdCI6MTQ4MzQ3MDg3NiwicHJvamVjdElkIjoiY2l0Y3lveDN6MHBiaDAxNzF1Nmk2YjhudSIsInVzZXJJZCI6ImNpeDlocDloZjc3YWcwMTI4aGV4cm5mNXoiLCJhdXRoRGF0YSI6eyJlbWFpbCI6Imp1bGlhbmJyZW5kbEBnbWFpbC5jb20ifX0.zI8QweyVke3IXMbJDHN1a-qsZ3aUhyPkfXE5Ji_sCC0"
 
 const fetchResponses = function(phraseId) {
@@ -39,7 +38,9 @@ const removeResponse = function(phraseId, responseId) {
 }
 
 const phraseId = "cixi6jot5qkla0141zcxwxut3"
-const text = `sdffsdf " \\sfd `
+const text = `df`
 const html = "<p>" + text + "</p>"
 const vars = []
 addResponse(phraseId, text, html, vars)
+
+

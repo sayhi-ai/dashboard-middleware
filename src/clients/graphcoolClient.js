@@ -4,28 +4,6 @@ import Lokka from "lokka"
 import HttpTransport from "lokka-transport-http"
 
 export default class {
-  login(query) {
-    const headers = {
-      'Accept': 'application/json',
-      'Content-Type': 'application/json'
-    }
-    const client = new Lokka({
-      transport: new HttpTransport(ENV_VARS.CONSTANTS.GRAPHCOOL_URL, {headers})
-    })
-
-    return client.query(query.query)
-      .then(response => {
-        if (response !== undefined) {
-          return response
-        }
-        throw new Error("GraphCool login query returned undefined.")
-      })
-      .catch(error => {
-        logger.error("Error with GQ login query.")
-        throw new Error(`Error with graph GQ login query -- Error: ${error}`)
-      })
-  }
-
   query(query) {
     const headers = {
       'Accept': 'application/json',
@@ -36,7 +14,7 @@ export default class {
       transport: new HttpTransport(ENV_VARS.CONSTANTS.GRAPHCOOL_URL, {headers})
     })
 
-    return client.query(query.query)
+    return client.query(query.query, query.vars)
       .then(response => {
         if (response !== undefined) {
           return response

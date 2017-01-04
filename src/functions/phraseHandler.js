@@ -1,6 +1,5 @@
 import ENV_VARS from "../util/ENV_VARS"
 import logger from "../util/logger"
-import PreProcessor from '../util/preProcessor'
 import Promise from "bluebird"
 
 export default class {
@@ -12,21 +11,19 @@ export default class {
   getPhrases(token, botId) {
     logger.debug(`Getting all phrases for bot: ${botId}.`)
 
-    const isWord = PreProcessor.checkForWord(botId)
-    if (!isWord) {
-      throw new Error("Error getting phrases: bot id is invalid.")
-    }
-
     const query = {
       query: `
-        query {
-          Bot(id: "${botId}") {
+        query getPhrases($id: id) {
+          Bot(id: $id) {
             phrases {
               id,
               phrase
             }
           }
         }`,
+      vars: {
+        id: botId
+      },
       token: token
     }
 
@@ -43,21 +40,19 @@ export default class {
   addPhrase(token, botId, phrase) {
     logger.debug(`Adding phrase to bot: ${botId}.`)
 
-    const isWord = PreProcessor.checkForWord(botId)
-    if (!isWord) {
-      throw new Error("Error adding phrase: bot id is invalid.")
-    }
-    phrase = PreProcessor.safeEscape(phrase)
-
     const query = {
       query: `
-        query {
-          Bot(id: "${botId}") {
-            phrases(filter: {phrase: "${phrase}"}) {
+        query checkDuplicatePhrase($id: ID!, $phrase: String!){
+          Bot(id: $id) {
+            phrases(filter: {phrase: $phrase}) {
               id
             }
           }
         }`,
+      vars: {
+        id: botId,
+        phrase: phrase
+      },
       token: token
     }
 
@@ -95,11 +90,14 @@ export default class {
   _createNewPhrase(token, botId, phrase) {
     const query = {
       query: `
-        mutation {
-          createPhrase(phrase: "${phrase}") {
+        mutation createPhrase($phrase: String!) {
+          createPhrase(phrase: $phrase) {
             id
           }
         }`,
+      vars: {
+        phrase: phrase
+      },
       token: token
     }
 
@@ -117,10 +115,10 @@ export default class {
   _linkPhraseToBot(token, botId, phraseId) {
     const query = {
       query: `
-        mutation {
+        mutation linkPhraseToBot($botId: ID!, $phraseID!: ID!) {
           addToBotPhraseRelation(
-            botsBotId: "${botId}",
-            phrasesPhraseId: "${phraseId}"
+            botsBotId: $botId,
+            phrasesPhraseId: $phraseId}
           ) {
             botsBot {
               id
@@ -130,6 +128,10 @@ export default class {
             }
           }
         }`,
+      vars: {
+        botId: botId,
+        phraseId: phraseId
+      },
       token: token
     }
 
@@ -152,11 +154,6 @@ export default class {
   removePhrase(token, phraseId) {
     logger.debug(`Preparing to remove phrase: ${phraseId}..`)
 
-    const isWord = PreProcessor.checkForWord(phraseId)
-    if (!isWord) {
-      throw new Error("Error removing phrase: phrase id is invalid.")
-    }
-
     return this._removeResponsesFromPhrase(token, phraseId)
       .then(response => this._removePhrase(token, phraseId))
       .catch(error => {
@@ -169,13 +166,16 @@ export default class {
 
     const query = {
       query: `
-        query {
-          Phrase(id: "${phraseId}") {
+        query findPhraseToRemove($id: ID!){
+          Phrase(id: $id) {
             responses {
               id
             }
           }
         }`,
+      vars: {
+        id: phraseId
+      },
       token: token
     }
 
@@ -208,11 +208,14 @@ export default class {
   _removePhrase(token, phraseId) {
     const query = {
       query: `
-          mutation {
-            deletePhrase(id: "${phraseId}") {
+          mutation deletePhrase($id: ID!){
+            deletePhrase(id: $id) {
               id
             }
           }`,
+      vars: {
+        id: phraseId
+      },
       token: token
     }
 

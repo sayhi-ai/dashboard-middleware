@@ -1,6 +1,5 @@
 import ENV_VARS from "../util/ENV_VARS"
 import logger from "../util/logger"
-import PreProcessor from '../util/preProcessor'
 import Promise from "bluebird"
 
 export default class {
@@ -10,13 +9,6 @@ export default class {
 
   getResponses(token, phraseId, type) {
     logger.debug(`Getting responses for phrase: ${phraseId}..`)
-
-    const isWord = PreProcessor.checkForWord(phraseId)
-    if (!isWord) {
-      throw new Error("Error getting responses: phrase id is invalid.")
-    }
-    type = PreProcessor.safeEscape(type)
-
     return this._getResponses(token, phraseId, type, null)
       .then(response => {
         return {responses: response}
@@ -29,14 +21,17 @@ export default class {
   _getResponses(token, phraseId, type) {
     const query = {
       query: `
-        query {
-          Phrase(id: "${phraseId}") {
+        query getResponses($id: ID!) {
+          Phrase(id: $id) {
             responses {
               id,
               ${type}
             }
           }
         }`,
+      vars: {
+        id: phraseId
+      },
       token: token
     }
 
@@ -53,20 +48,16 @@ export default class {
   addResponse(token, phraseId, text, html, vars) {
     logger.debug(`Adding a response to phrase: ${phraseId}..`)
 
-    const isWord = PreProcessor.checkForWord(phraseId)
-    if (!isWord) {
-      throw new Error("Error adding response: phrase id is invalid.")
-    }
-    text = PreProcessor.safeEscape(text)
-    html = PreProcessor.safeEscape(html)
-
     const query = {
       query: `
-        query {
-          allResponses(filter: {text: "${text}"}) {
+        query checkDuplicateResponse($text: String){
+          allResponses(filter: {text: $text}) {
             id
           }
         }`,
+      vars: {
+        text: text
+      },
       token: token
     }
 
@@ -102,15 +93,20 @@ export default class {
 
     const query = {
       query: `
-        mutation {
+        mutation createResponse($text: String!, $html: String!, $vars: [String!]) {
           createResponse(
-            text: "${text}",
-            html: "${html}",
-            vars: ${JSON.stringify(realVars)}
+            text: $text,
+            html: $html,
+            vars: $vars
           ) {
             id
           }
         }`,
+      vars: {
+        text: text,
+        html: html,
+        vars: realVars
+      },
       token: token
     }
 
@@ -127,10 +123,10 @@ export default class {
   _linkResponseToPhrase(token, phraseId, responseId) {
     const query = {
       query: `
-        mutation {
+        mutation linkResponseToPhrase($phraseId: ID!, $responseId: ID!) {
           addToPhraseResponseRelation(
-            phrasesPhraseId: "${phraseId}",
-            responsesResponseId: "${responseId}"
+            phrasesPhraseId: $phraseId,
+            responsesResponseId: $responseId
           ) {
             phrasesPhrase {
               id
@@ -140,6 +136,10 @@ export default class {
             }
           }
         }`,
+      vars: {
+        phraseId: phraseId,
+        responseId: responseId
+      },
       token: token
     }
 
@@ -162,24 +162,18 @@ export default class {
   removeResponse(token, phraseId, responseId) {
     logger.debug(`Removing response: ${responseId}..`)
 
-    const phraseIsWord = PreProcessor.checkForWord(phraseId)
-    if (!phraseIsWord) {
-      throw new Error("Error removing response: phrase id is invalid.")
-    }
-    const responseIsWord = PreProcessor.checkForWord(responseId)
-    if (!responseIsWord) {
-      throw new Error("Error removing response: response id is invalid.")
-    }
-
     const query = {
       query: `
-        query {
-          Response(id: "${responseId}") {
+        query findResponseToRemove($id: ID!) {
+          Response(id: $id) {
             phrases {
               id
             }
           }
         }`,
+      vars: {
+        id: phraseId
+      },
       token: token
     }
 
@@ -201,10 +195,10 @@ export default class {
   _unlinkResponse(token, phraseId, responseId) {
     const query = {
       query: `
-        mutation {
+        mutation unlinkResponse($phraseId: ID!, $responseId: ID!) {
           removeFromPhraseResponseRelation(
-            phrasesPhraseId: "${phraseId}",
-            responsesResponseId: "${responseId}"
+            phrasesPhraseId: $phraseId,
+            responsesResponseId: $responseId
           ) {
             phrasesPhrase {
               id
@@ -214,6 +208,10 @@ export default class {
             }
           }
         }`,
+      vars: {
+        phraseId: phraseId,
+        responseId: responseId
+      },
       token: token
     }
 
@@ -235,11 +233,14 @@ export default class {
   _removeResponse(token, responseId) {
     const query = {
       query: `
-        mutation {
-          deleteResponse(id: "${responseId}") {
+        mutation deleteResponse($id: id) {
+          deleteResponse(id: $id) {
             id
           }
         }`,
+      vars: {
+        id: responseId
+      },
       token: token
     }
 
