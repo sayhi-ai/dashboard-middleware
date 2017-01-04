@@ -233,7 +233,7 @@ export default class {
   _removeResponse(token, responseId) {
     const query = {
       query: `
-        mutation deleteResponse($id: id) {
+        mutation deleteResponse($id: ID!) {
           deleteResponse(id: $id) {
             id
           }
