@@ -74,6 +74,28 @@ const removeResponse = function(phraseId, responseId) {
     })
 }
 
+const fetchBots = function() {
+  return middleware.default.getBotHandler().getBots(token)
+    .then(json => console.log(json.bots))
+    .catch(error => {
+      console.log("Unable to fetch bots.")
+    })
+}
+
+const addBot = function(name, description, tags) {
+  return middleware.default.getBotHandler().addBot(token, name, description, tags)
+    .then(json => {
+      if (json.added) {
+        console.log(json.id)
+      } else {
+        console.log("Bot with name already exists.")
+      }
+    })
+    .catch(error => {
+      console.log("Unable to add bot.")
+    })
+}
+
 const phraseId = "cixi6jot5qkla0141zcxwxut3"
 const text = `df`
 const html = "<p>" + text + "</p>"
@@ -82,4 +104,5 @@ const vars = []
 // fetchPhrases("cixf3et6c5io4010759dn050r")
 // removeResponse("cixi6jot5qkla0141zcxwxut3", "cixj2min3jy8c0161kjtutp5s")
 // addPhrase("cixf3et6c5io4010759dn050r", "test")
-removePhrase("cixj49vng7hr40108i6k1lxqy")
+addBot("TestBot2", "desc", [])
+fetchBots(token)

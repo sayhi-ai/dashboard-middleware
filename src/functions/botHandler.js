@@ -20,8 +20,8 @@ export default class {
             bots {
               id,
               name,
-              type,
-              description
+              description,
+              tags
             }
           }
         }`,
@@ -42,8 +42,8 @@ export default class {
       })
   }
 
-  addBot(token, name, type, description) {
-    logger.debug(`Adding a bot with name: ${name}, type: ${type}, description: ${description}..`)
+  addBot(token, name, description, tags) {
+    logger.debug(`Adding a bot with name: ${name}, description: ${description}..`)
 
     const decodedToken = jwtDecode(token)
     const query = {
@@ -69,12 +69,6 @@ export default class {
         }
         return "no-op"
       })
-      .then(noOp => {
-        if (type === "" || type.length > ENV_VARS.CONSTANTS.MAX_PHRASE_TOKEN_LENGTH) {
-          throw new Error(`Length of type must be between 0 and ${ENV_VARS.CONSTANTS.MAX_PHRASE_TOKEN_LENGTH}.`)
-        }
-        return "no-op"
-      })
       .then(noOp => this._gcClient.query(query))
       .then(responseQl => {
         if (description === null) {
@@ -84,27 +78,32 @@ export default class {
         const bots = responseQl.User.bots
         if (bots.length === 0) {
           logger.debug(`No bot with the given information exists for user: ${decodedToken.userId}, creating a new one.`)
-          return this._createNewBot(token, name, type, description)
+          return this._createNewBot(token, name, tags, description)
         }
 
-        throw new Error("A bot with this name already exists.")
+        return {added: false}
       })
       .catch(error => {
         throw new Error(`Error adding bot. -- Error: ${error}`)
       })
   }
 
-  _createNewBot(token, name, type, description) {
+  _createNewBot(token, name, tags, description) {
+    let realTags = ["{}"]
+    if (tags.length > 0) {
+      realTags = tags
+    }
+
     const query = {
       query: `
-        mutation createBot($name: String!, $type: String!, $description: String) {
-          createBot(name: $name, type: $type, description: $description) {
+        mutation createBot($name: String!, $description: String, $tags: [String!]!) {
+          createBot(name: $name, tags: $tags, description: $description) {
             id
           }
         }`,
       vars: {
         name: name,
-        type: type,
+        tags: realTags,
         description: description
       },
       token: token
@@ -113,7 +112,7 @@ export default class {
     return this._gcClient.query(query)
       .then(response => {
         logger.debug("Created new bot. Linking it with user..")
-        this._linkBotWithUser(token, response.createBot.id)
+        return this._linkBotWithUser(token, response.createBot.id)
       })
       .catch(error => {
         throw new Error(`Error creating a new bot. -- Error: ${error}`)
