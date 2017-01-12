@@ -1,6 +1,6 @@
 {
   "name": "dashboard-middleware",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Middleware for sayhi.ai dashboard.",
   "main": "lib/lib.min.js",
   "repository": {
