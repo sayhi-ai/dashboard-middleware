@@ -94,11 +94,7 @@ export default class {
     const query = {
       query: `
         mutation createResponse($text: String!, $html: String!, $vars: [String!]) {
-          createResponse(
-            text: $text,
-            html: $html,
-            vars: $vars
-          ) {
+          createResponse(text: $text, html: $html, vars: $vars) {
             id
           }
         }`,
@@ -156,6 +152,41 @@ export default class {
       })
       .catch(error => {
         throw new Error(`Unable to link response: ${responseId} to phrase: ${phraseId}. -- Error: ${error}`)
+      })
+  }
+
+  updateResponse(token, responseId, text, html, vars) {
+    let realVars = ["{}"]
+    if (vars.length > 0) {
+      realVars = vars
+    }
+
+    const query = {
+      query: `
+        mutation updateResponse($id: ID!, $text: String!, $html: String!, $vars: [String!]) {
+          updateResponse(id: $id, text: $text, html: $html, vars: $vars) {
+            id
+          }
+        }`,
+      vars: {
+        id: responseId,
+        text: text,
+        html: html,
+        vars: realVars
+      },
+      token: token
+    }
+
+    return this._gcClient.query(query)
+      .then(response => {
+        logger.debug(`Updated response: ${responseId}.`)
+        if (response.updateResponse !== null) {
+          return {updated: true}
+        }
+        return {updated: false}
+      })
+      .catch(error => {
+        throw new Error(`Unable to update response. -- Error: ${error}`)
       })
   }
 

@@ -151,6 +151,34 @@ export default class {
       })
   }
 
+  updatePhrase(token, phraseId, phrase) {
+    const query = {
+      query: `
+        mutation updatePhrase($id: ID!, $phrase: String!) {
+          updatePhrase(id: $id, phrase: $phrase) {
+            id
+          }
+        }`,
+      vars: {
+        id: phraseId,
+        phrase: phrase
+      },
+      token: token
+    }
+
+    return this._gcClient.query(query)
+      .then(response => {
+        logger.debug(`Updated phrase: ${phraseId}.`)
+        if (response.updatePhrase !== null) {
+          return {updated: true}
+        }
+        return {updated: false}
+      })
+      .catch(error => {
+        throw new Error(`Unable to phrase phrase. -- Error: ${error}`)
+      })
+  }
+
   removePhrase(token, phraseId) {
     logger.debug(`Preparing to remove phrase: ${phraseId}..`)
 

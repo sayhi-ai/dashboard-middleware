@@ -96,7 +96,24 @@ const addBot = function(name, description, tags) {
     })
 }
 
-const phraseId = "cixi6jot5qkla0141zcxwxut3"
+const updatePhrase = function(phraseId, text) {
+  return middleware.default.getPhraseHandler().updatePhrase(token, phraseId, text)
+    .then(json => console.log(json))
+    .catch(error => {
+      console.log("Unable to update phrase.")
+    })
+}
+
+const updateResponse = function(responseId, text, html, vars) {
+  return middleware.default.getResponseHandler().updateResponse(token, responseId, text, html, vars)
+    .then(json => console.log(json))
+    .catch(error => {
+      console.log("Unable to update response.")
+    })
+}
+
+const phraseId = "cixka3pqnlb4201082xxr0w59"
+const responseId = "cixmbjlws8d8i0169nnjkk295"
 const text = `df`
 const html = "<p>" + text + "</p>"
 const vars = []
@@ -105,4 +122,6 @@ const vars = []
 // removeResponse("cixi6jot5qkla0141zcxwxut3", "cixj2min3jy8c0161kjtutp5s")
 // addPhrase("cixf3et6c5io4010759dn050r", "test")
 addBot("TestBot2", "desc", [])
-fetchBots(token)
+// fetchBots(token)
+// updatePhrase(phraseId, text)
+// updateResponse(responseId, "Replaced Text", "HTML", [])

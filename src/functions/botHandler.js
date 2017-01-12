@@ -150,10 +150,57 @@ export default class {
 
         const botId = response.addToUserBotRelation.botsBot.id
         logger.debug("Linked bot with user successfully.")
-        return {added: true, id: botId}
+        logger.debug("Adding initial phrase to bot..")
+        return this._phraseHandler.addPhrase(token, botId, "Hi")
+          .then(result => {
+            if (result.added) {
+              logger.debug("Initial phrase added to bot successfully.")
+              return {added: true, id: botId}
+            }
+            logger.error(`Error adding initial phrase to bot: ${botId}.`)
+            return {added: false, id: botId}
+          })
+          .catch(error => {
+            throw new Error(`Error adding initial phrase to bot: "${botId}" -- Error: ${error}`)
+          })
       })
       .catch(error => {
         throw new Error(`Error linking bot: "${botId}" with user: "${decodedToken.userId}" -- Error: ${error}`)
+      })
+  }
+
+  updateBot(token, botId, name, tags, description) {
+    let realTags = ["{}"]
+    if (tags.length > 0) {
+      realTags = tags
+    }
+
+    const query = {
+      query: `
+        mutation updateBot($id: ID!, $name: String!, $description: String, $tags: [String!]!) {
+          updateBot(id: $id, name: $name, tags: $tags, description: $description) {
+            id
+          }
+        }`,
+      vars: {
+        id: botId,
+        name: name,
+        tags: realTags,
+        description: description
+      },
+      token: token
+    }
+
+    return this._gcClient.query(query)
+      .then(response => {
+        logger.debug(`Updated bot: ${botId}.`)
+        if (response.updateBot !== null) {
+          return {updated: true}
+        }
+        return {updated: false}
+      })
+      .catch(error => {
+        throw new Error(`Unable to update bot. -- Error: ${error}`)
       })
   }
 
